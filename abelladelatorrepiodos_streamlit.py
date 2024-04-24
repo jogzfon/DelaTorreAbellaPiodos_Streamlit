@@ -1,29 +1,39 @@
+import streamlit as st
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 import pickle
 
-df = pd.read_csv('Obesity Classification.csv')
-le = LabelEncoder()
+with open('RandomForest_model.pkl', 'rb') as file:
+    RClassifier = pickle.load(file)
 
-df['Gender'] = le.fit_transform(df['Gender'])
-df.drop(labels='ID', axis=1, inplace=True)
+# Define the Streamlit app
+def main():
 
-X = df.drop('Label', axis=1)
-y = df['Label']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    st.title('Obesity Classification App')
 
-RClassifier = RandomForestClassifier()
-RClassifier.fit(X_train, y_train)
-print(X_test)
-y_pred = RClassifier.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-print("ACCURACY: ", accuracy)
+    # Sidebar for user input
+    st.sidebar.header('User Input')
+    age = st.sidebar.slider('Age', 14, 100, step=1)
+    gender = st.sidebar.selectbox('Gender', ['Male', 'Female'])
+    height = st.sidebar.slider('Height (cm)', 100, 300, step=1)
+    weight = st.sidebar.slider('Weight (kg)', 20, 500, step=1)
 
-with open('RandomForest_model.pkl', 'wb') as f:
-    pickle.dump(RClassifier, f)
+    # Calculate BMI
+    bmi = weight / (height / 100) ** 2
+    gender_encoded = 1 if gender == 'Female' else 0
 
+    # Button for prediction
+    if st.sidebar.button('Predict'):
+        # Make prediction
+        prediction = RClassifier.predict([[age, gender_encoded, height, weight, bmi]])
+
+        # Display prediction
+        st.subheader('Prediction')
+        st.write(f'The predicted label is: {prediction[0]}')
+
+if __name__ == '__main__':
+    main()
