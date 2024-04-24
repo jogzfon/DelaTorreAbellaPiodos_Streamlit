@@ -13,7 +13,7 @@ with open('RandomForest_model.pkl', 'rb') as file:
 # Define the Streamlit app
 def main():
 
-    st.title('Obesity Classification App')
+    st.title('Weight Classification App')
 
     # Sidebar for user input
     st.sidebar.header('User Input')
